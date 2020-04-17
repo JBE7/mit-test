@@ -122,6 +122,7 @@ class TicketAdminApplicationTests {
 		return number;
 	}
 
+	// -------------------- Happy tests -------------------------------------------
 	@Test
 	@Order(1)
 	void fetchTicketTest() throws Exception {
@@ -185,7 +186,7 @@ class TicketAdminApplicationTests {
 	}
 	
 	@Test
-	@Order(3)
+	@Order(4)
 	void updateStatusTest() throws Exception {
 		int id = 1;
 		TicketDto ticket = new TicketDto();
@@ -201,7 +202,7 @@ class TicketAdminApplicationTests {
 	}
 	
 	@Test
-	@Order(4)
+	@Order(5)
 	void deleteByIdTest() throws Exception {
 		int id = 1;
 		
@@ -216,7 +217,7 @@ class TicketAdminApplicationTests {
 	}
 	
 	@Test
-	@Order(5)
+	@Order(6)
 	void findAllTicketsNotFinishedTest() throws Exception {
 		generateAndSaveData();
 		
@@ -238,7 +239,7 @@ class TicketAdminApplicationTests {
 	// -------------------- Unhappy tests -----------------------------------------
 
 	@Test
-	@Order(6)
+	@Order(7)
 	void createNullTicketTest() throws Exception {
 		
 		mvc.perform(post("/ticket")
@@ -249,7 +250,7 @@ class TicketAdminApplicationTests {
 
 	
 	@Test
-	@Order(7)
+	@Order(8)
 	void findTicketByStringIdTest() throws Exception {	
 		mvc.perform(get("/ticket/{id}", "A")
 				.contentType(MediaType.APPLICATION_JSON))
@@ -257,7 +258,7 @@ class TicketAdminApplicationTests {
 	}
 	
 	@Test
-	@Order(8)
+	@Order(9)
 	void findTicketByNegativeIdTest() throws Exception {	
 		mvc.perform(get("/ticket/{id}", "-1")
 				.contentType(MediaType.APPLICATION_JSON))
@@ -265,7 +266,7 @@ class TicketAdminApplicationTests {
 	}
 	
 	@Test
-	@Order(9)
+	@Order(10)
 	void findTicketByNonExistentIdTest() throws Exception {	
 		mvc.perform(get("/ticket/{id}", "12345")
 				.contentType(MediaType.APPLICATION_JSON))
@@ -273,7 +274,7 @@ class TicketAdminApplicationTests {
 	}
 	
 	@Test
-	@Order(10)
+	@Order(11)
 	void updateStatusWithEmptyStatusTest() throws Exception {
 		int id = getLastIdUsedFromRepository() + 1;
 		
@@ -300,7 +301,7 @@ class TicketAdminApplicationTests {
 	}
 	
 	@Test
-	@Order(11)
+	@Order(12)
 	void updateStatusWithInvalidStatusTest() throws Exception {
 		int id = getLastIdUsedFromRepository() + 1;
 
@@ -327,7 +328,7 @@ class TicketAdminApplicationTests {
 	}
 	
 	@Test
-	@Order(12)
+	@Order(13)
 	void updateStatusWithNegativeIdTest() throws Exception {
 		int id = -10;
 		
@@ -338,7 +339,7 @@ class TicketAdminApplicationTests {
 	}
 	
 	@Test
-	@Order(13)
+	@Order(14)
 	void deleteByNegativeIdTest() throws Exception {
 		int id = -1;
 		
@@ -348,7 +349,7 @@ class TicketAdminApplicationTests {
 	}
 	
 	@Test
-	@Order(14)
+	@Order(15)
 	void deleteByStringIdTest() throws Exception {
 		
 		mvc.perform(delete("/ticket/{id}", "A")
@@ -357,7 +358,7 @@ class TicketAdminApplicationTests {
 	}
 	
 	@Test
-	@Order(15)
+	@Order(16)
 	void deleteWithInvalidStatus() throws Exception {
 		
 		String ticketNameTest = "Test 1";
@@ -381,7 +382,7 @@ class TicketAdminApplicationTests {
 	}
 	
 	@Test
-	@Order(16)
+	@Order(17)
 	void findAllTicketsNotFinishedEmptyRepositoryTest() throws Exception {	
 		int id = getLastIdUsedFromRepository();
 		
