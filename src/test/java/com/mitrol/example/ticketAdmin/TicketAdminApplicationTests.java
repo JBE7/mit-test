@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mitrol.example.ticketAdmin.model.TicketDto;
 import com.mitrol.example.ticketAdmin.model.TicketStatus;
 import org.hamcrest.Matchers;
+import org.json.JSONObject;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -18,7 +19,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
-
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -112,7 +112,7 @@ class TicketAdminApplicationTests {
 	 * @return the higher number in the list
 	 */
 	protected int getHigherNumberFromList(List<Integer> ints) {
-		int number = 0;
+		int number = -1;
 		
 		for (Integer integer : ints) {
 			if(integer.intValue() > number)
@@ -236,8 +236,180 @@ class TicketAdminApplicationTests {
 	}
 	
 	// -------------------- Unhappy tests -----------------------------------------
+
+	@Test
+	@Order(6)
+	void createNullTicketTest() throws Exception {
+		
+		mvc.perform(post("/ticket")
+				.content("{}")
+				.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest());
+	}
+
 	
-//	@Test
-//	@Order(6)
-//	
+	@Test
+	@Order(7)
+	void findTicketByStringIdTest() throws Exception {	
+		mvc.perform(get("/ticket/{id}", "A")
+				.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isNotAcceptable());
+	}
+	
+	@Test
+	@Order(8)
+	void findTicketByNegativeIdTest() throws Exception {	
+		mvc.perform(get("/ticket/{id}", "-1")
+				.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isNotAcceptable());
+	}
+	
+	@Test
+	@Order(9)
+	void findTicketByNonExistentIdTest() throws Exception {	
+		mvc.perform(get("/ticket/{id}", "12345")
+				.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isNotFound());
+	}
+	
+	@Test
+	@Order(10)
+	void updateStatusWithEmptyStatusTest() throws Exception {
+		int id = getLastIdUsedFromRepository() + 1;
+		
+		String ticketNameTest = "Test 1";
+		TicketDto ticket = new TicketDto();
+		ticket.setName(ticketNameTest);
+		ticket.setStatus(TicketStatus.WORKING);
+
+		mvc.perform(post("/ticket")
+				.content(mapToJson(ticket))
+				.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(content()
+						.contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+				.andExpect(jsonPath("$.name", is(ticketNameTest)));
+		
+		mvc.perform(put("/ticket/{id}", id)
+				.content("{}")
+				.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(content()
+						.contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+				.andExpect(jsonPath("$.status", is(TicketStatus.PENDING.toString())));
+	}
+	
+	@Test
+	@Order(11)
+	void updateStatusWithInvalidStatusTest() throws Exception {
+		int id = getLastIdUsedFromRepository() + 1;
+
+		String ticketNameTest = "Test 1";
+		TicketDto ticket = new TicketDto();
+		ticket.setName(ticketNameTest);
+		ticket.setStatus(TicketStatus.WORKING);
+
+		mvc.perform(post("/ticket")
+				.content(mapToJson(ticket))
+				.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(content()
+						.contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+				.andExpect(jsonPath("$.name", is(ticketNameTest)));
+		
+		JSONObject ticketToJson = new JSONObject();
+		ticketToJson.put("status", "asd");
+		
+		mvc.perform(put("/ticket/{id}", id)
+				.content(ticketToJson.toString())
+				.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest());
+	}
+	
+	@Test
+	@Order(12)
+	void updateStatusWithNegativeIdTest() throws Exception {
+		int id = -10;
+		
+		mvc.perform(put("/ticket/{id}", id)
+				.content("{}")
+				.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isNotAcceptable());
+	}
+	
+	@Test
+	@Order(13)
+	void deleteByNegativeIdTest() throws Exception {
+		int id = -1;
+		
+		mvc.perform(delete("/ticket/{id}", id)
+				.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isNotAcceptable());
+	}
+	
+	@Test
+	@Order(14)
+	void deleteByStringIdTest() throws Exception {
+		
+		mvc.perform(delete("/ticket/{id}", "A")
+				.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isNotAcceptable());
+	}
+	
+	@Test
+	@Order(15)
+	void deleteWithInvalidStatus() throws Exception {
+		
+		String ticketNameTest = "Test 1";
+		TicketDto ticket = new TicketDto();
+		ticket.setName(ticketNameTest);
+		ticket.setStatus(TicketStatus.WORKING);
+
+		mvc.perform(post("/ticket")
+				.content(mapToJson(ticket))
+				.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(content()
+						.contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+				.andExpect(jsonPath("$.name", is(ticketNameTest)));
+		
+		int id = getLastIdUsedFromRepository();
+		
+		mvc.perform(delete("/ticket/{id}", id)
+				.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isNotAcceptable());
+	}
+	
+	@Test
+	@Order(16)
+	void findAllTicketsNotFinishedEmptyRepositoryTest() throws Exception {	
+		int id = getLastIdUsedFromRepository();
+		
+		while(id != -1) {
+			JSONObject ticketToJson = new JSONObject();
+			ticketToJson.put("status", "DONE");
+			
+			mvc.perform(put("/ticket/{id}", id)
+					.content(ticketToJson.toString())
+					.contentType(MediaType.APPLICATION_JSON))
+					.andExpect(status().isOk());
+			
+			mvc.perform(delete("/ticket/{id}", id)
+					.contentType(MediaType.APPLICATION_JSON))
+					.andExpect(status().isOk());
+			
+			id = getLastIdUsedFromRepository();
+		}
+		
+		MvcResult result = mvc.perform(get("/ticket/notFinished"))
+			.andExpect(status().isOk())
+			.andReturn();
+		
+		ObjectMapper mapper = new ObjectMapper();
+		
+		List<TicketDto> tickets = mapper.readValue(result.getResponse().getContentAsString(), 
+				new TypeReference<List<TicketDto>>() {});
+		
+		assertTrue(tickets.size() == 0);
+	}	
 }

@@ -1,9 +1,12 @@
 package com.mitrol.example.ticketAdmin.model;
 
+import javax.validation.constraints.NotNull;
+
 public class TicketDto {
 
     private Integer id;
 
+    @NotNull(message = "Ticket name cannot be empty")
     private String name;
 
     private TicketStatus status = TicketStatus.PENDING;

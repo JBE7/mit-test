@@ -16,5 +16,4 @@ public interface TicketRepository extends JpaRepository<Ticket, Integer> {
 	 * @return A list of Tickets that matches some of the Status argument
 	 */
 	List<Ticket> findAllByStatusIn(List<TicketStatus> list);
-
 }
