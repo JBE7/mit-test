@@ -70,11 +70,11 @@ public class TicketService {
 	}
 
 	/**
-	 * Delete the element of the database that matches the given id
+	 * Delete the element of the repository that matches the given id
 	 * 
 	 * @param id Id of the element that will be deleted
 	 * @return True if the element was deleted successfully, false if the element
-	 *         stills in the database
+	 *         stills in the repository
 	 */
 	public boolean deleteById(int id) {
 		repository.deleteById(id);
@@ -82,6 +82,15 @@ public class TicketService {
 		return repository.findById(id).isPresent() ? false : true;
 	}
 
+	/**
+	 * Finds all the elements that matches the TicketStatus given by argument
+	 * 
+	 * Use: call this function passing by argument all the TicketStatus that you
+	 * need. Can be 1 or multiple arguments. 
+	 * 
+	 * @param status Filter by this status
+	 * @return A list of TicketDto who's status is in the Status parameter List
+	 */
 	public List<TicketDto> findAllByStatus(TicketStatus... status) {
 		List<Ticket> entities = repository.findAllByStatusIn(Arrays.asList(status));
 		return entities.stream().map(this::toDto).collect(Collectors.toList());
